@@ -37,7 +37,9 @@ function C.send(_, player, command, args)
     end
 end
 
-function C.teleport(_, player, dz)
+-- forceLocal: multiplayer fallback that moves the player directly instead of using the
+-- admin /teleportto command (only for your own test server).
+function C.teleport(_, player, dz, forceLocal)
     local x, y = math.floor(player:getX()), math.floor(player:getY())
     local z = math.floor(player:getZ()) + dz
     local sq = getCell():getGridSquare(x, y, z)
@@ -45,8 +47,8 @@ function C.teleport(_, player, dz)
         C.say("No floor at z=" .. z .. " here. Carve a test room first and stand above it.")
         return
     end
-    U.log("teleport to " .. x .. "," .. y .. "," .. z)
-    if isClient() then
+    U.log("teleport to " .. x .. "," .. y .. "," .. z .. (forceLocal and " (local fallback)" or ""))
+    if isClient() and not forceLocal then
         -- Admin command; works on your own server where you are admin.
         SendCommandToServer("/teleportto " .. (x + 0.5) .. "," .. (y + 0.5) .. "," .. z)
     else
@@ -138,6 +140,10 @@ local function addMenu(playerIndex, context, worldObjects, test)
     sub:addOption("1. Carve test room below me", nil, C.send, player, "carveBelow", {})
     sub:addOption("2. Teleport down one level", nil, C.teleport, player, -1)
     sub:addOption("3. Teleport up one level", nil, C.teleport, player, 1)
+    if isClient() then
+        sub:addOption("Teleport down (backup method)", nil, C.teleport, player, -1, true)
+        sub:addOption("Teleport up (backup method)", nil, C.teleport, player, 1, true)
+    end
     sub:addOption("Grow room 1 tile east (separate room)", nil, C.send, player, "grow", { mode = "newRoom" })
     sub:addOption("Grow room 1 tile east (same room)", nil, C.send, player, "grow", { mode = "sameRoom" })
     sub:addOption("Start rain", nil, C.send, player, "startRain", {})

@@ -15,7 +15,7 @@ UGMSpike = UGMSpike or {}
 local U = UGMSpike
 
 U.MODULE = "UGMSpike"
-U.VERSION = "0.1.0"
+U.VERSION = "0.1.1"
 U.ROOM_NAME = "ugm_spike"
 U.ROOM_SIZE = 5
 U.MIN_LEVEL = -32
