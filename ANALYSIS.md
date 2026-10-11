@@ -109,6 +109,19 @@ Researched on 2026-10-11, against Project Zomboid **42.21**. Here is how each pa
 - **Rain, wind chill and temperature** all follow these same flags.
 - **Vanilla's room detection for player builds** (IsoRegions) does not work below z = 0.
 
+**Update after reading the 42.21 game code.** The test mod uses approach 1 below, through the game's own `BuildingRoomsEditor`. What the code shows:
+
+- **Registering rooms.** `BuildingRoomsEditor` is reachable from Lua. `createBuilding()` → `createRoom(z)` → `addRectangle()` → `applyChanges()` adds a user-defined building to the room map.
+  - Its rooms are created with `explored = true` and `doneSpawn = true`. So they should not spawn zombies or loot.
+  - On the player's machine, `applyChanges(false)` also updates loaded squares, lighting, cutaways and pathfinding.
+- **Saving and reloading.** The game never writes these rooms to disk itself. Rooms are not saved per square either: on chunk load each square gets its room from the room map.
+  - So the mod stores its rooms in ModData and registers them again in `OnLoadedMapZones`. That event fires after the room map loads and before any chunk loads.
+- **Never pass a room ID through Lua.** Room IDs are 64-bit, and Lua numbers are doubles. For map cells with Y index ≥ 32 (most of Knox County) the ID silently loses precision. Calling `square:setRoomID()` from Lua is therefore unsafe; the test mod lets Java assign rooms instead.
+- **Server timing.** A dedicated or hosted server has no player chunk maps, so its already-loaded squares only pick up a new room when the chunk reloads. Vanilla's own player-built rooms behave the same way.
+  - Where the ID is small enough to be exact, the test mod sets it on the server immediately.
+- **Growing a room.** Re-registering a building at the same position and level *replaces* it, because the building and room "meta IDs" include x, y and z. That gives a way to grow one room tile by tile.
+  - Side effect: room IDs of rooms added later in the same 256×256 cell shift. The test checks how much that matters.
+
 **So the dug area needs a real room.** Candidate approaches, in the order to try:
 
 1. **Create `RoomDef`/`BuildingDef` (or `IsoRoom`) objects from Lua and register them in the map's room data.**
@@ -134,6 +147,12 @@ Researched on 2026-10-11, against Project Zomboid **42.21**. Here is how each pa
 
 - Excavation's flicker on "even" depths matches a known engine quirk. Its helper library (Starlit) keeps each chunk's lowest level from becoming **odd**, because "if it does, when the next lowest level is created its lighting will be severely bugged."
 - The plan is to always grow levels in pairs, and to test z −1 to −4 in the spike. If flicker stays, limit the depth by default (like Excavation) and keep investigating.
+- **Confirmed in the code:** the renderer draws underground levels in pairs: −2/−1, −4/−3 and so on (`FBORenderLevels.calculateMinLevel`). So a chunk whose lowest level is odd has a half-empty pair.
+  - The test mod keeps every chunk's lowest level even. It creates an empty helper square one level down, and redoes this after reload, because empty squares aren't saved.
+- **A likely cause of the existing flicker bugs:** Starlit's parity check (`IsoObjectUtils.addSquare`) appears to have its comparison reversed (`minLevel < z - 1`).
+  - If so, it never extends the chunk downward. Worse, it can *raise* the lowest level, which deletes deeper squares.
+  - That may explain Excavation's flicker and its "walls disappeared" reports when the depth limit is turned off.
+  - This is from reading the code only; not confirmed in game.
 - While the player is underground, the renderer draws only that level and the levels below it. That is useful, because nothing above clutters the view.
 
 ### 5.5 Getting down
@@ -190,7 +209,7 @@ workshop.txt, preview.png
 
 ## 7. Roadmap
 
-**Phase 0: technical spike** (go/no-go)
+**Phase 0: technical spike** (go/no-go). **Built:** `Contents/mods/UGMSpike`. The test steps are in `TESTING.md`.
 A debug-only test mod with right-click commands:
 1. Carve a 5×5 room at z −1 under the player, with walls and a floor.
 2. Register it as a room (approach §5.3-1, then -2).

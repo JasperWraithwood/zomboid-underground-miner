@@ -1,5 +1,13 @@
 # Underground Miner (Project Zomboid B42)
 
-Planned mod for digging underground and building real basements and underground rooms in Project Zomboid Build 42.
+A planned mod for digging underground and building real basements and underground rooms in Project Zomboid Build 42 (42.21+).
 
-Status: research and planning. See [ANALYSIS.md](ANALYSIS.md) for the feasibility analysis, competition, technical design, risks and roadmap.
+**Status:** technical test phase. Before building the real mod, the test mod checks whether dug rooms can count as indoors, survive reloads, work in multiplayer, and go several levels deep without glitches.
+
+| File | What it is |
+|---|---|
+| [ANALYSIS.md](ANALYSIS.md) | Feasibility analysis: engine facts, competing mods, technical design, risks, roadmap |
+| [MOD_OPPORTUNITIES.md](MOD_OPPORTUNITIES.md) | What the community wants and what's missing; ranked mod ideas |
+| [TESTING.md](TESTING.md) | How to install and run the test mod, and what to send back |
+| `Contents/mods/UGMSpike/` | The test mod (debug tool, not for real saves) |
+| `tests/spike_sim.lua` | Offline simulation of the test mod's logic (`lua5.1 tests/spike_sim.lua`) |

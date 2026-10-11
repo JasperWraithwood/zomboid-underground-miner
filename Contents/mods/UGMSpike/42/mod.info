@@ -1,0 +1,6 @@
+name=Underground Miner - Test Spike
+id=UGMSpike
+description=DEBUG TEST MOD for the Underground Miner project. Carves test rooms underground and reports whether they count as indoors, how they render, and whether they survive save/reload and multiplayer. Use only on a throwaway test save.
+author=Underground Miner project
+modversion=0.1.0
+versionMin=42.21.0
