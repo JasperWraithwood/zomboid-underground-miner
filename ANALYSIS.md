@@ -69,7 +69,8 @@ Researched on 2026-10-11, against Project Zomboid **42.21**. Here is how each pa
 - **Soil logistics:** dirt has to go somewhere, in sacks or carts, dumped as piles or used for farming and sandbags.
 - **Supports and cave-ins:** wooden or metal beams within N tiles, otherwise a risk of collapse. Excavation's top planned feature, never built.
 - **Hidden hatch entrance** that zombies don't notice, and a lockable trapdoor.
-- **Root cellar:** a stable cool temperature that slows food spoilage.
+- **Root cellar (approved):** food stored in containers in a dug cellar spoils more slowly, even without electricity. See §5.9.
+- **Frost-free cellar (approved):** in winter, once the grid is off, the cellar stays at least about 10 °C, which makes it a winter refuge. See §5.9.
 - **Underground light and power:** lanterns, wiring from a generator or the grid, ventilation for generators and fires.
 - **Water:** digging near rivers or below a depth floods tiles, and pumps are needed. Optional.
 - **Mining:** stone, then rare ore deposits as an optional sandbox setting. Knox Underground is already going this way, so it is lower priority.
@@ -195,6 +196,35 @@ Contents/mods/UndergroundMiner/
 workshop.txt, preview.png
 ```
 
+### 5.9 Cellar temperature and food storage (approved 2026-10-12)
+
+**What the game does today** (`ClimateManager.getAirTemperatureForSquare`, 42.21):
+- **While grid power is on,** every square in a room is **22 °C**, with no depth rule. This simulates heating and air conditioning, and vanilla basements get the same.
+- **After the power shutoff,** indoor temperature follows outdoor temperature, moved part of the way toward 22 °C.
+- The spike confirmed this: our cellar showed 22 °C.
+
+**What Lua can change:**
+- **Lowering air temperature: no.** The only hook is heat sources (`IsoHeatSource`), and they can only *raise* temperature. `getHeatSourceHighestTemperature` only accepts a higher value, blended by distance.
+- So "cooler than outside in summer" would need a Java mod. **Out of scope.**
+
+**Frost-free cellar (heat-source floor):**
+- Add an invisible heat source in each cellar room with `IsoHeatSource.new(x, y, z, radius, temperature)` and `getCell():addHeatSource(...)`. It only matches squares on the same z.
+- The target is a floor of about 10 °C, tunable in sandbox options.
+- It only has an effect when the moderated indoor temperature drops below that, which means winter after the grid shutoff.
+- Large rooms need one source per rectangle, or several sources, because the effect fades with distance from the source.
+- Heat sources are runtime only. Add them again when the room's chunk loads, and remove them when it unloads.
+- **To verify:** in multiplayer, body temperature may be calculated on the server, so the source must exist on the server (and on the client for display). Test in Phase 2.
+
+**Root cellar (our own aging system):**
+- Food aging (`Food.updateAge`) slows down only in powered fridges and freezers (by `FridgeFactor`), or when the food is frozen. Container temperature (`ItemContainer.setCustomTemperature`) changes food heat and freezing, **not** the aging speed. So we can't reuse a vanilla hook.
+- **Plan:**
+  - Every in-game hour, on the server or in single player, check containers on squares that belong to our cellar rooms.
+  - For each `Food` item, give back part of the age it gained since the last check: `item:setAge(item:getAge() - gained * reduction)`. The default reduction is about 50 %, as a sandbox option.
+  - Skip items that are frozen, already in a powered fridge, or rotten.
+  - Sync in multiplayer with `sendItemStats(item)`.
+- **Mind the cost:** only scan loaded chunks, keep a list of cellar containers instead of searching squares every hour, and cap the work per tick.
+- **Balance:** it should not beat a powered fridge. It should be clearly better than a normal room after the power is gone.
+
 ---
 
 ## 6. Risks
@@ -235,7 +265,8 @@ You run the test script: SP, then save and reload, then a hosted MP game with a 
 - Client square sync, room sync on join, server-restart tests, admin uninstall command.
 
 **Phase 3: gameplay depth**
-- Supports and cave-ins, hidden hatch, root cellar temperature, light and power, then optional mining and water.
+- **First (approved):** root cellar (slower food spoilage) and frost-free cellar (winter temperature floor). See §5.9.
+- Then supports and cave-ins, hidden hatch, light and power, and optional mining and water.
 
 **Phase 4: art and polish**
 - Custom dirt and rock wall tiles, sounds, Workshop page, translations.
