@@ -15,7 +15,7 @@ UGMSpike = UGMSpike or {}
 local U = UGMSpike
 
 U.MODULE = "UGMSpike"
-U.VERSION = "0.1.1"
+U.VERSION = "0.1.2"
 U.ROOM_NAME = "ugm_spike"
 U.ROOM_SIZE = 5
 U.MIN_LEVEL = -32
@@ -184,9 +184,28 @@ function U.registerRooms(defs, loading, replace)
 
     for _, def in ipairs(todo) do
         local name = existingRoomName(def)
-        U.log("registered " .. U.describeDef(def) .. " -> room map now says '" .. tostring(name) .. "' (loading=" .. tostring(bLoading) .. ")")
+        local mapBuilding = U.markAsMapBuilding(def)
+        U.log("registered " .. U.describeDef(def) .. " -> room map now says '" .. tostring(name) .. "' (loading=" .. tostring(bLoading) .. ", map building=" .. tostring(mapBuilding) .. ")")
     end
     return #todo
+end
+
+-- The editor creates "user-defined" buildings, but those belong to the player-built
+-- building system (IsoRegions): it rebuilds every user-defined building in a cell from
+-- its own data and crashes on ones it did not make (NullPointerException in
+-- WorldRegionToMetaGrid.assignBuildingToRegions after reload). Marking ours as normal
+-- map buildings makes it leave them alone. Surface player builds are unaffected because
+-- it only compares basements with basements.
+function U.markAsMapBuilding(def)
+    local r = def.rects[1]
+    local roomDef = getWorld():getMetaGrid():getRoomAt(r.x, r.y, def.z)
+    if not roomDef or roomDef:getName() ~= def.name then return false end
+    local building = roomDef:getBuilding()
+    if not building then return false end
+    if building:isUserDefined() then
+        building:setUserDefined(false)
+    end
+    return not building:isUserDefined()
 end
 
 -- Server only: Lua numbers are doubles, so a 64-bit room ID only survives the trip

@@ -110,7 +110,8 @@ local function newWorld()
             getName = function() return room.name end,
             getID = function() return room.id end,
             getIDString = function() return string.format("%.0f", room.id) end,
-            isUserDefined = function() return true end,
+            isUserDefined = function() return false end,
+            getBuilding = function() return room.building end,
         }
     end
     W.metaGrid = {
@@ -132,9 +133,12 @@ local function newWorld()
     local pending = {}
     W.editor = {
         createBuilding = function()
-            local building = { rooms = {} }
+            -- Like BREBuilding: the editor makes "user-defined" buildings.
+            local building = { rooms = {}, userDefined = true }
+            function building:isUserDefined() return self.userDefined end
+            function building:setUserDefined(b) self.userDefined = b end
             function building:createRoom(level)
-                local room = { level = level, rects = {}, name = "" }
+                local room = { level = level, rects = {}, name = "", building = self }
                 function room:setName(n) self.name = n end
                 function room:addRectangle(x, y, w, h) self.rects[#self.rects + 1] = { x = x, y = y, w = w, h = h } end
                 self.rooms[#self.rooms + 1] = room
@@ -179,6 +183,15 @@ local function newWorld()
     function W.reloadRoomsAndSquares()
         W.rooms = {}
         for _, sq in pairs(W.squares) do sq.roomId = -1 end
+    end
+    -- Mimics IsoRegions.clientProcessBuildings: it throws on any user-defined
+    -- building it did not create itself (the crash seen in 42.21 after reload).
+    function W.userDefinedBuildings()
+        local count = 0
+        for _, room in ipairs(W.rooms) do
+            if room.building and room.building.userDefined then count = count + 1 end
+        end
+        return count
     end
     function W.assignRoomsFromMap()
         for _, sq in pairs(W.squares) do
@@ -298,6 +311,7 @@ do
     check(centre ~= nil and centre:getFloor() ~= nil, "room centre square exists with a floor")
     check(centre and centre:isInARoom(), "room centre is assigned to the registered room")
     check(W.chunkFor(10003, 10003):getMinLevel() == -2, "chunk lowest level kept even (-2)")
+    check(W.userDefinedBuildings() == 0, "carved room is a map building, not user-defined (no IsoRegions crash)")
     check(W.cell:getGridSquare(10006, 10006, -1) ~= nil, "outer SE wall post square exists")
 
     U.Client.send(nil, W.player, "carveBelow", {})
@@ -335,6 +349,7 @@ do
     check(W.cell:getGridSquare(10007, 10003, -1):isInARoom(), "after reload the same-room tile is back")
     check(W.cell:getGridSquare(10003, 10003, -2):isInARoom(), "after reload the z=-2 room is back")
     check(W.cell:getGridSquare(10003, 10003, -3):isInARoom(), "after reload the z=-3 room is back")
+    check(W.userDefinedBuildings() == 0, "after reload no user-defined buildings (no IsoRegions crash)")
 
     U.Client.send(nil, W.player, "listRooms", {})
     check(U.Client.result ~= nil and #U.Client.result.lines == 4, "list rooms shows 4 rooms")
@@ -370,6 +385,7 @@ do
     local sq = CW.cell:getGridSquare(20003, 20003, -1)
     check(sq ~= nil, "client creates the missing square")
     check(sq and sq:isInARoom(), "client registers the room")
+    check(CW.userDefinedBuildings() == 0, "client room is a map building (no IsoRegions crash)")
     tick(CW, CU.CLIENT_OBJECT_CHECK_DELAY + 1)
     check(sq and sq:getFloor() ~= nil, "client fills in the floor that never arrived")
     check(CW.chunkFor(20003, 20003):getMinLevel() == -2, "client keeps chunk lowest level even")

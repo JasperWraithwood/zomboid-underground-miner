@@ -119,6 +119,10 @@ Researched on 2026-10-11, against Project Zomboid **42.21**. Here is how each pa
 - **Never pass a room ID through Lua.** Room IDs are 64-bit, and Lua numbers are doubles. For map cells with Y index ≥ 32 (most of Knox County) the ID silently loses precision. Calling `square:setRoomID()` from Lua is therefore unsafe; the test mod lets Java assign rooms instead.
 - **Server timing.** A dedicated or hosted server has no player chunk maps, so its already-loaded squares only pick up a new room when the chunk reloads. Vanilla's own player-built rooms behave the same way.
   - Where the ID is small enough to be exact, the test mod sets it on the server immediately.
+- **Mark the buildings as normal map buildings. Found in testing (game test, 2026-10-12).** The editor creates "user-defined" buildings, but those belong to the player-built building system (IsoRegions). After reload it rebuilds every user-defined building in the cell from its own data. On ours it threw a `NullPointerException` in `WorldRegionToMetaGrid.assignBuildingToRegions` every frame, which sent the player back to the menu.
+  - Fix: right after registering, call `setUserDefined(false)` on our buildings.
+  - Surface player builds are unaffected, because that system only compares basements with basements (`BuildingDef.isBasement`).
+  - Side effect: the game now also saves our rooms in `map_meta.bin`. On load it logs a harmless "invalid room/building metaID" for each of them, because they are re-registered only later.
 - **Growing a room.** Re-registering a building at the same position and level *replaces* it, because the building and room "meta IDs" include x, y and z. That gives a way to grow one room tile by tile.
   - Side effect: room IDs of rooms added later in the same 256×256 cell shift. The test checks how much that matters.
 
