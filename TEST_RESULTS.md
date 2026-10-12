@@ -12,9 +12,13 @@
 | A4: growing the room | ✅ Pass | Both separate-room and same-room growth work |
 | A5: levels −2 to −4 | ✅ Pass | No flicker reported (keeping each chunk's lowest level even) |
 | A6: save and reload, v0.1.1 | ❌ Crash | `NullPointerException` in `WorldRegionToMetaGrid.assignBuildingToRegions`: IsoRegions treated our user-defined buildings as its own |
-| A6: save and reload, v0.1.2 | ✅ Pass | After the fix (buildings marked as map buildings), the save loads and rooms, walls and indoor status all hold |
+| A6: save and reload, v0.1.2 | ✅ Pass | After the fix (buildings marked as map buildings), the save loads and rooms, walls and indoor status all hold. Log: 5 rooms re-registered with `map building=true`, and no exceptions in two reloads. |
+| Level fix after reload | ✅ Pass | Log: `chunk min level -1 was odd, extended to -2` on load. A z=−3 room extends the chunk to −4 (`chunk levels -4..0`). |
+| Same-room growth: room IDs | ⚠️ Noted | Log: main room ID `...152 → ...153` after growth (replace re-adds it at the end of the cell's room list), so the pocket room's ID shifted too. SP/clients reassign squares at once, but server squares would hold stale IDs until reload. Design decision: see ANALYSIS §5.3. |
 | A7: under a house | — | Not tested yet |
 | A8: forget + reload | — | Not tested yet |
+
+Log notes (2026-10-12): `invalid room/building metaID ... in cell 42,36` = our rooms, expected and harmless. The `cell 25,33` and `Basements ... duplicate RoomDef.metaID ... 10707,9484,0` errors are vanilla and appear without the mod's rooms.
 
 ## Hosted server (Part B)
 

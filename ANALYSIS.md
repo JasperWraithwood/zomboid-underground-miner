@@ -125,7 +125,8 @@ Researched on 2026-10-11, against Project Zomboid **42.21**. Here is how each pa
   - Surface player builds are unaffected, because that system only compares basements with basements (`BuildingDef.isBasement`).
   - Side effect: the game now also saves our rooms in `map_meta.bin`. On load it logs a harmless "invalid room/building metaID" for each of them, because they are re-registered only later.
 - **Growing a room.** Re-registering a building at the same position and level *replaces* it, because the building and room "meta IDs" include x, y and z. That gives a way to grow one room tile by tile.
-  - Side effect: room IDs of rooms added later in the same 256×256 cell shift. The test checks how much that matters.
+  - Side effect: room IDs of rooms added later in the same 256×256 cell shift. **Confirmed in testing:** after a same-room growth the main room's ID changed (`...152 → ...153`) and the pocket room after it shifted.
+  - **Decision for the real mod:** during a session, add each newly dug area as its own small room. That only appends to the room list, so no IDs shift. At the next load, register the merged rectangles as one room (§5.2). Never replace rooms while the server is running.
 
 **So the dug area needs a real room.** Candidate approaches, in the order to try:
 
