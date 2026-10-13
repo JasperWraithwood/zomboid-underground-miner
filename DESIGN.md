@@ -1,6 +1,6 @@
 # Gameplay design: digging, stairs, supports
 
-Status: **proposal (2026-10-13)**. Numbers are starting values, and most of them are sandbox options. Marked items are open for the project owner to decide.
+Status: **agreed (2026-10-13)**. The project owner decided the open questions (see §6). Numbers are starting values, and most of them are sandbox options.
 
 This builds on what the test mod proved in the real game (42.21): dug rooms count as indoors, stay dry, are dark until lit, keep working after save/reload, and go down to z −4 without flicker.
 
@@ -17,15 +17,14 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 | | Dirt (z −1, −2) | Stone (z −3 and deeper) |
 |---|---|---|
 | Tool | Shovel / spade (vanilla item tag `DigGrave`) | Pickaxe (vanilla tag `PickAxe`) |
-| Time per tile (normal speed) | ~30 s real time | ~60 s |
+| Time per tile (normal speed) | ~30 s real time (agreed) | ~60 s |
 | Material out | 2 sacks of dirt (needs empty sacks) | 2–4 stones (vanilla stone item) |
 | Cost to the character | Endurance, arm and back strain (B42 muscle strain) | More of both |
 
 **Rules.**
 - You can't dig when exhausted ("too tired").
 - You can't dig next to water, under roads or asphalt without breaking them first, or deeper than the sandbox limit (default −4, tested).
-- **Soil must go somewhere.** Each tile needs empty sacks, which become sacks of dirt (vanilla items, so the dirt is useful for farming and sandbag walls).
-  - *Open question:* make sacks optional with a sandbox switch ("easy mode: soil disappears")?
+- **Soil must go somewhere (agreed: mandatory).** Each tile needs empty sacks, which become sacks of dirt (vanilla items, so the dirt is useful for farming and sandbag walls). No "soil disappears" mode.
 - **Supports are mandatory** (§3): you can't dig a tile that would be too far from a support.
 - Strength and Fitness speed digging up. Digging gives a little Strength XP.
 
@@ -37,7 +36,7 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 
 ## 2. Getting down
 
-### 2a. Stairs (main entrance)
+### 2a. Stairs (main entrance; agreed: two steps)
 
 1. On natural ground (grass, dirt, gravel, sand), right-click → **Dig stairs down**.
 2. A cursor shows a **1 × 3 tile** stairwell, and you pick the direction (N/E/S/W). Vanilla's own unfinished digging code uses the same 1 × 3 footprint, so we stay compatible if TIS finishes it.
@@ -70,32 +69,34 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 
 ## 3. Supports (mandatory)
 
-**The rule:** every dug tile must be within **2 tiles** of a support (sandbox option). One support covers a **5 × 5** area.
-- A 5 × 5 room needs one support in the middle.
-- A long tunnel needs a support every 5 tiles.
+**The rule:** every dug tile must be covered by a support.
+- **In dirt (z −1, −2):** coverage is **2 tiles** around the support, an area of **5 × 5**.
+  - A 5 × 5 room needs one support in the middle.
+  - A long tunnel needs a support every 5 tiles.
+- **In stone (z −3 and deeper):** rock holds itself better, so every support covers **more**: 3 tiles more around it (agreed).
+- All radii are sandbox options.
 
 **Enforcement:**
 - The dig cursor turns red and says "Too dangerous: build a support first" when the target tile isn't covered.
 - The player can't skip supports. That's the "mandatory" part, and it's predictable rather than random.
 
-| Support | Materials | Skill | Allowed depth |
-|---|---|---|---|
-| Wooden mine prop (post + beam) | 2 planks or 1 log, 4 nails, hammer | Carpentry 1 | z −1 and −2 |
-| Stone/brick pillar | stones or bricks, mortar | Masonry 2 | any |
-| Metal support | metal pipes or sheets, welding torch + mask | Metalworking 2 | any |
+| Support | Materials | Skill | Covers in dirt | Covers in stone |
+|---|---|---|---|---|
+| Wooden mine prop (post + beam) | 2 planks or 1 log, 4 nails, hammer | Carpentry 1 | 2 tiles (5 × 5) | 3 tiles (7 × 7) |
+| Stone/brick pillar | stones or bricks, mortar | Masonry 2 | 3 tiles (7 × 7) | 4 tiles (9 × 9) |
+| Metal support | metal pipes or sheets, welding torch + mask | Metalworking 2 | 3 tiles (7 × 7) | 4 tiles (9 × 9) |
 
+- **Wooden props are allowed at every depth (agreed).** Stone and metal supports are an upgrade that covers a larger area. They are also sturdier (more health) and don't rot.
 - Undug ground around a tunnel doesn't count. Only built supports do.
 - Supports are objects with health, so they can be damaged or dismantled.
-- Deeper levels (stone) need stone or metal supports.
-- *Open question:* allow wooden props at all depths, just weaker?
 
-**Cave-ins** (sandbox, default ON in "realistic", OFF in "casual"):
+**Cave-ins** (agreed: **ON by default**, can be switched off in sandbox options):
 - If a support is removed or destroyed, the tiles it covered become **unsupported**.
 - **Warning first:** creaking sounds and dust for some in-game hours, enough time to fix it.
 - If nobody fixes it, each unsupported tile has a chance per in-game hour to **collapse**:
   - It fills back in: it becomes solid ground with walls again.
   - Items on it are buried and lost.
-  - A player standing there takes damage (sandbox: injury level) and is pushed to the nearest open tile.
+  - A player standing there takes damage (default: moderate injuries such as bruises, scratches and a chance of a fracture; sandbox: injury level) and is pushed to the nearest open tile.
 - Collapses never spread past the unsupported area, and never happen while the area isn't loaded.
 
 **Implementation notes.**
@@ -124,10 +125,16 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 
 ---
 
-## 6. Open questions (for the project owner)
+## 6. Decisions (project owner, 2026-10-13)
 
-1. Sacks of dirt mandatory, or a sandbox switch for "soil disappears"?
-2. Stairs in two steps (dig, then build with planks), or one step?
-3. Wooden supports allowed at all depths (weaker), or stone/metal required below −2?
-4. Cave-ins default ON or OFF? How harsh should the injury be?
-5. Dig times: ~30 s per dirt tile at normal speed; is that fun or too fast/slow?
+| Question | Decision |
+|---|---|
+| Sacks of dirt | **Mandatory** |
+| Stairs | **Two steps:** dig the stairwell, then build the stairs with planks |
+| Wooden supports | **Allowed at every depth.** In stone every support covers a larger area |
+| Cave-ins | **ON by default**, moderate injury, sandbox switch to turn off |
+| Dig speed | **~30 s per dirt tile** at normal speed is good |
+
+**Still open:**
+- A quick "cellar hatch roof" build over the stairwell (§2a)?
+- Block digging under any player-built building that isn't yours (§5)?
