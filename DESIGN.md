@@ -17,7 +17,7 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 | | Dirt (z −1, −2) | Stone (z −3 and deeper) |
 |---|---|---|
 | Tool | Shovel / spade (vanilla item tag `DigGrave`) | Pickaxe (vanilla tag `PickAxe`) |
-| Time per tile (normal speed) | ~30 s real time (agreed) | ~60 s |
+| Time per tile (normal speed) | **~60 s** real time (agreed) | **~3 min** (agreed) |
 | Material out | 2 sacks of dirt (needs empty sacks) | 2–4 stones (vanilla stone item) |
 | Cost to the character | Endurance, arm and back strain (B42 muscle strain) | More of both |
 
@@ -40,7 +40,7 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 
 1. On natural ground (grass, dirt, gravel, sand), right-click → **Dig stairs down**.
 2. A cursor shows a **1 × 3 tile** stairwell, and you pick the direction (N/E/S/W). Vanilla's own unfinished digging code uses the same 1 × 3 footprint, so we stay compatible if TIS finishes it.
-3. **Step 1, dig the stairwell** (shovel, sacks, ~2 min):
+3. **Step 1, dig the stairwell** (shovel, sacks, ~4 min: 3 tiles + landing at ~60 s each):
    - The 3 ground tiles at z 0 are removed, leaving an open hole.
    - 3 tiles plus a 1-tile landing are carved at z −1.
    - A **support is required** at the landing (the stair entrance counts as dug space).
@@ -133,7 +133,7 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 | Stairs | **Two steps:** dig the stairwell, then build the stairs with planks |
 | Wooden supports | **Allowed at every depth.** In stone every support covers a larger area |
 | Cave-ins | **ON by default**, moderate injury, sandbox switch to turn off |
-| Dig speed | **~30 s per dirt tile** at normal speed is good |
+| Dig speed | **~60 s per dirt tile, ~3 min per stone tile** at normal speed (changed 2026-10-13; sandbox multiplier) |
 
 **Still open:**
 - A quick "cellar hatch roof" build over the stairwell (§2a)?
