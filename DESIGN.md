@@ -96,7 +96,21 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 - If nobody fixes it, each unsupported tile has a chance per in-game hour to **collapse**:
   - It fills back in: it becomes solid ground with walls again.
   - Items on it are buried and lost.
-  - A player standing there takes damage (default: moderate injuries such as bruises, scratches and a chance of a fracture; sandbox: injury level) and is pushed to the nearest open tile.
+  - A player standing there is hurt depending on the material (agreed 2026-10-13):
+
+    | Collapse in | Result for a player standing on the tile |
+    |---|---|
+    | **Dirt** (z −1, −2) | **Heavy injuries:** fractures (legs and arms), deep scratches and lacerations, heavy bruising. The player is pushed to the nearest open tile. |
+    | **Stone** (z −3 and deeper) | **Instant death** |
+
+  - Zombies standing on a collapsing tile die in both materials.
+  - Because stone collapses kill, the **warning must be fair and impossible to miss**:
+    - creaking sounds, falling dust and a message ("The ceiling is creaking!") to everyone nearby;
+    - at least **6 in-game hours** of warning before the first collapse (sandbox);
+    - the warning repeats when a player enters the area.
+  - **Multiplayer:** a tile can only collapse while its area is loaded. A player who logs out in a warned area is safe until someone is there again; the warning then restarts.
+  - Sandbox options: injury level for dirt (light / heavy / deadly) and for stone (heavy / deadly), and a master switch for cave-ins.
+  - Technical (to verify in 42.21): injuries via the vanilla body-part API (fracture time, scratches, lacerations), synced with `syncBodyPart` as other B42 mods do; death on the server through the vanilla kill path, so it counts as a normal death.
 - Collapses never spread past the unsupported area, and never happen while the area isn't loaded.
 
 **Implementation notes.**
@@ -132,7 +146,7 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 | Sacks of dirt | **Mandatory** |
 | Stairs | **Two steps:** dig the stairwell, then build the stairs with planks |
 | Wooden supports | **Allowed at every depth.** In stone every support covers a larger area |
-| Cave-ins | **ON by default**, moderate injury, sandbox switch to turn off |
+| Cave-ins | **ON by default**, sandbox switch to turn off. **Dirt: heavy injuries (fractures, scratches). Stone: instant death.** Fair warning of at least 6 in-game hours first |
 | Dig speed | **~60 s per dirt tile, ~3 min per stone tile** at normal speed (changed 2026-10-13; sandbox multiplier) |
 
 **Still open:**
