@@ -253,9 +253,10 @@ A debug-only test mod with right-click commands:
 
 You run the test script: SP, then save and reload, then a hosted MP game with a second client. **Decision point:** if indoors plus persistence plus MP sync work, go on. If not, choose between a smaller "gameplay add-on" scope and stopping.
 
-**Phase 1: MVP** (single player)
+**Phase 1: MVP** (single player). The detailed gameplay is in **DESIGN.md**.
 - Dig dirt with a shovel, needing sacks.
-- Dig stairs down, and remove natural floors.
+- Dig stairs down (1 × 3 stairwell, then vanilla wooden stairs), and remove natural floors.
+- **Mandatory supports** (approved 2026-10-13): no digging beyond 2 tiles from a support. Wooden props first.
 - Automatic walls and floor.
 - Indoor rooms.
 - Depth down to −2.
@@ -267,7 +268,7 @@ You run the test script: SP, then save and reload, then a hosted MP game with a 
 
 **Phase 3: gameplay depth**
 - **First (approved):** root cellar (slower food spoilage) and frost-free cellar (winter temperature floor). See §5.9.
-- Then supports and cave-ins, hidden hatch, light and power, and optional mining and water.
+- Then cave-ins (warning, then collapse of unsupported tiles), stone and metal supports, ladder shaft, hidden hatch, light and power, and optional mining and water.
 
 **Phase 4: art and polish**
 - Custom dirt and rock wall tiles, sounds, Workshop page, translations.
