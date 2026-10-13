@@ -152,3 +152,26 @@ This builds on what the test mod proved in the real game (42.21): dug rooms coun
 **Still open:**
 - A quick "cellar hatch roof" build over the stairwell (§2a)?
 - Block digging under any player-built building that isn't yours (§5)?
+
+---
+
+## 7. Realism candidates (proposed 2026-10-13; owner to pick)
+
+**Free from vanilla, because our dug spaces are real rooms** (to confirm in tests):
+- **Claustrophobic trait:** panic grows in rooms smaller than 70 tiles (`IsoGameCharacter`, 42.21), so narrow tunnels scare claustrophobic characters. **Agoraphobic** characters feel safe underground.
+- **Corpses rotting in an enclosed cellar** make you sick (sandbox `DecayingCorpseHealthImpact`).
+- **Generator power reaches 3 levels down** (sandbox `GeneratorVerticalPowerRange`, default 3), so a generator on the surface can light the cellar.
+
+| # | Idea | What it adds | Effort | Suggested phase |
+|---|---|---|---|---|
+| R1 | **Soil layers**: topsoil → clay → gravel/sand → limestone (deterministic by location); near rivers/lakes more clay and sand | Different speed and stability per layer. **Clay** feeds B42 pottery, **stone** feeds masonry. Sand is unstable: supports cover less. | Low | 1 |
+| R2 | **Digging is loud**: shovel = medium noise, pickaxe = loud (vanilla `addSound`) | Zombies on the surface come to investigate. Tension, and a reason to dig at night or in a quiet area. | Low | 1 |
+| R3 | **Body and tool wear**: shovel/pickaxe lose condition per tile; clothes get dirty; without gloves, chance of hand scratches and blisters; more hunger and thirst | Digging is real work, not free | Low | 1 |
+| R4 | **Weather and season**: frozen ground in winter (surface dig only with a pickaxe, slower); mud after rain (slower, dirtier); dry summer soil is faster | Seasonal planning: dig the entrance before winter | Low–Med | 2–3 |
+| R5 | **Hard hat**: a worn hard hat or miner's helmet lowers dirt cave-in injuries one step (stone stays deadly) | Safety gear has a purpose | Low | 3 (with cave-ins) |
+| R6 | **Buried items recoverable**: items lost in a dirt cave-in are stored; re-digging the tile returns some of them, damaged | Less frustrating, realistic | Low | 3 |
+| R7 | **Ventilation**: fires, charcoal stoves and generators underground without an air shaft cause carbon-monoxide poisoning (drowsiness → sickness → death); a 1-tile air shaft to the surface fixes it | Real danger, a reason to build shafts | Med | 3 |
+| R8 | **Water**: rain runs down an open stairwell and the bottom tile gets wet; digging below the water table near rivers or lakes seeps water (wet floor, slower walking) until you build drainage or a pump | Big realism and gameplay, but the hardest to do well | High | 3–4 |
+| R9 | **Heavy loads above**: digging under a building, a road or a tree needs stronger supports, or isn't allowed (tree roots) | Structural logic | Med | 3 |
+
+Not recommended: real soil volume (one tile ≈ 2.5 m³ would need ~100 sacks), and vehicles collapsing shallow tunnels (too complex and griefable in MP).
